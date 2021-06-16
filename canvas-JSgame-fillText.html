@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Отгадай слово!</title>
+</head>
+<body>
+<h1>Отгадай слово!</h1>
+<canvas id="canvas" width="210" height="240"></canvas>
+
+<script>
+
+//Создаем массив со словами
+var words = [
+	"прога",
+	"макака",
+	"красный",
+	"оладик"
+];
+
+// Создаем здесь свои функции
+
+var pickWord = function () {
+    // Возврещает случайно выбранное слово
+    return words[Math.floor(Math.random() * words.length)];
+};
+
+var setupAnswerArray = function (word1) {
+    // Возвращает итоговый массив для заданного слова word
+    var myArray = [];
+    for (var i = 0; i < word1.length; i++) {
+	myArray[i] = "_";
+    };
+    return myArray;
+};
+var showPlayerProgress = function (answerArray) {
+    // С помощью alert отображает текущее состояние игры
+    return alert("Отгадайте это слово  " + answerArray.join(" "));
+};
+var getGuess = function () {
+    //Запрашивает ответ игрока с помощью prompt
+    var guess = prompt("Угадайте букву или нажмите Отмена для выхода из игры.");
+    return guess;
+};
+var numberOfAttempts = 0; //Перемення для учета ошибочных попыток
+//var correctLetter; // Переменная для хранения правильной буквы
+var wrongLetter;// Переменная для храиения ошибочной буквы
+var wrongLetterPosition = 0;
+var lineYPosition = 13;
+function drawWrongLetter (guess, word, answerArray) {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "Black";    
+    var checkWrongLetter = true;
+    for (var i = 0; i < word.length; i++) {
+		if (word[i] === guess) {						
+			checkWrongLetter = false;
+        }
+    };
+    if (checkWrongLetter) {
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        wrongLetter = guess;
+        ctx.fillText(wrongLetter, 170, wrongLetterPosition);
+        ctx.fillRect(170, lineYPosition, 20, 4);
+        wrongLetterPosition += 30;
+        lineYPosition += 30;
+    }
+};
+var updateGameState = function (guess, word, answerArray) {
+    // Обновляет answerArray согласно ответу игрока (guess)
+    // возвращает число, обозначающее, сколько раз буква guess
+    // встречается в слове, чтобы можно было обновить значение
+    // remainingLetters
+    var numberOfLetters = 0;
+	for (var j = 0; j < word.length; j++) {
+		if (word[j] === guess) {
+			answerArray[j] = guess;			
+			numberOfLetters++;
+			var myTemp = true; // Если myTemp = true, значит введенная буква guess совпала с одной из букв в слове word
+        } 
+    }
+	if (myTemp !== true) {
+		numberOfAttempts++;
+	}
+    return numberOfLetters;
+};
+
+function drawMan () {
+	// Рисуем человечка
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    ctx.lineWidth = 4;
+    if (numberOfAttempts == 1) {
+		ctx.strokeRect(20, 10, 20, 20);
+	} else if (numberOfAttempts == 2) {
+		ctx.moveTo(30, 30);
+		ctx.lineTo(30, 70);
+		ctx.stroke();
+	} else if (numberOfAttempts == 3) {
+		ctx.moveTo(30, 50);
+		ctx.lineTo(10, 40);
+		ctx.stroke();
+	} else if (numberOfAttempts == 4) {
+		ctx.moveTo(30, 50);
+		ctx.lineTo(50, 40);
+		ctx.stroke();
+	} else if (numberOfAttempts == 5) {
+		ctx.moveTo(30, 70);
+		ctx.lineTo(10, 100);
+		ctx.stroke();
+	} else if (numberOfAttempts == 6) {	   
+		ctx.moveTo(30, 70);
+		ctx.lineTo(50, 100);    
+		ctx.stroke();
+	};
+};
+function drawCorrectLetters(answerArray) {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    ctx.clearRect (0, 210, 210, 240);
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "Black";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText(answerArray.join(" "), 0, 210);
+    
+};
+var showAnswerAndCongratulatePlayer = function (answerArray) {
+    // С помощью alert показывает игроку отгаданное слово
+    // и поздравляет с победой
+    return alert("Вы угадали следующие буквы в неизвестном слове  " + answerArray.join(" ") + " Отлично! Было загадано слово " + "''" + word + "''");
+};
+
+// word: загаданное слово
+var word = pickWord();
+// answerArray: итоговый массив
+var answerArray = setupAnswerArray (word);
+// remainingLetters: сколько букв осталось угадать
+var remainingLetters = word.length;
+while (remainingLetters > 0) {
+    showPlayerProgress(answerArray);
+    // guess: ответ игрока
+    var guess = getGuess();
+    if (guess === null) {
+        break;
+    } else if (guess.length !== 1) {
+        alert("Пожалуйста, введите только одну букву.");
+    } else {
+        // correctGuesses: количество открытых букв
+        var correctGuesses = updateGameState(guess, word, answerArray);
+        remainingLetters -= correctGuesses;
+		drawMan();
+		drawWrongLetter(guess, word, answerArray)
+		drawCorrectLetters(answerArray);
+		if (numberOfAttempts > 6) {
+            alert ("Игра окончена! Человечек нарисован, а слово не разгадано. Обновите старницу и попробуйте ещё раз");
+            break;
+		}
+	}
+}
+showAnswerAndCongratulatePlayer(answerArray);
+    
+</script>
+</body>
+</html>
+
